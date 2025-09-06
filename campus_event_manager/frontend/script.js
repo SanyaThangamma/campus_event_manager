@@ -34,9 +34,13 @@ async function fetchEvents() {
             deleteBtn.textContent = 'Delete';
             deleteBtn.onclick = async () => {
                 if (confirm(`Delete event "${e.name}"?`)) {
-                    const delRes = await fetch(`${baseUrl}/events/${e.id}`, { method: 'DELETE' });
-                    if (delRes.ok) fetchEvents();
-                    else alert("Failed to delete event.");
+                    try {
+                        const delRes = await fetch(`${baseUrl}/events/${e.id}`, { method: 'DELETE' });
+                        if (delRes.ok) fetchEvents();
+                        else alert("Failed to delete event.");
+                    } catch (err) {
+                        console.error("Error deleting event:", err);
+                    }
                 }
             };
 

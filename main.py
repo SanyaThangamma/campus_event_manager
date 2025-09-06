@@ -1,8 +1,38 @@
 # main.py
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
-from database import get_connection, init_db, fetch_all_events
+import sqlite3
+
+# ----- Database setup -----
+DB_NAME = "events.db"
+
+def get_connection():
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_connection()
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        date TEXT NOT NULL,
+        location TEXT,
+        description TEXT,
+        college_id INTEGER
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+def fetch_all_events():
+    conn = get_connection()
+    rows = conn.execute("SELECT * FROM events").fetchall()
+    conn.close()
+    return rows
 
 # ----- Pydantic Models -----
 class EventCreate(BaseModel):
@@ -30,12 +60,21 @@ class EventOut(BaseModel):
 # ----- FastAPI App -----
 app = FastAPI(title="Campus Event Manager")
 
-# Initialize DB on startup
+# --- CORS middleware ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (good for testing)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ----- Initialize DB on startup -----
 @app.on_event("startup")
 def startup_event():
     init_db()
 
-# Helper: convert sqlite3.Row to dict
+# ----- Helper -----
 def row_to_dict(row):
     if row is None:
         return None
