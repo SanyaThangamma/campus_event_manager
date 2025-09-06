@@ -1,8 +1,7 @@
-<<<<<<< HEAD
 # database.py
 import sqlite3
 from sqlite3 import Connection
-from typing import List, Tuple
+from typing import List
 
 DB_PATH = "events.db"
 
@@ -71,16 +70,19 @@ def insert_dummy_data() -> None:
     cursor = conn.cursor()
 
     # Insert events
-    cursor.execute("INSERT OR IGNORE INTO events (id, name, date, location, description, college_id) VALUES (?, ?, ?, ?, ?, ?)",
-                (1, "Tech Talk", "2025-09-10", "Auditorium", "Talk on latest tech trends", 101))
-    cursor.execute("INSERT OR IGNORE INTO events (id, name, date, location, description, college_id) VALUES (?, ?, ?, ?, ?, ?)",
-                (2, "Python Workshop", "2025-09-12", "Lab 1", "Hands-on Python workshop", 101))
+    cursor.execute("""
+    INSERT OR IGNORE INTO events (id, name, date, location, description, college_id)
+    VALUES (?, ?, ?, ?, ?, ?)""", (1, "Tech Talk", "2025-09-10", "Auditorium", "Talk on latest tech trends", 101))
+    
+    cursor.execute("""
+    INSERT OR IGNORE INTO events (id, name, date, location, description, college_id)
+    VALUES (?, ?, ?, ?, ?, ?)""", (2, "Python Workshop", "2025-09-12", "Lab 1", "Hands-on Python workshop", 101))
 
     # Insert students
-    cursor.execute("INSERT OR IGNORE INTO students (id, name, email) VALUES (?, ?, ?)",
-                (1, "Alice", "alice@example.com"))
-    cursor.execute("INSERT OR IGNORE INTO students (id, name, email) VALUES (?, ?, ?)",
-                (2, "Bob", "bob@example.com"))
+    cursor.execute("""
+    INSERT OR IGNORE INTO students (id, name, email) VALUES (?, ?, ?)""", (1, "Alice", "alice@example.com"))
+    cursor.execute("""
+    INSERT OR IGNORE INTO students (id, name, email) VALUES (?, ?, ?)""", (2, "Bob", "bob@example.com"))
 
     # Register students for events
     cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id) VALUES (?, ?)", (1, 1))
@@ -96,59 +98,33 @@ def insert_dummy_data() -> None:
     conn.commit()
     conn.close()
 
+# Fetch functions
 def fetch_all_events() -> List[sqlite3.Row]:
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM events")
-    events = cursor.fetchall()
+    rows = conn.execute("SELECT * FROM events").fetchall()
     conn.close()
-    return events
+    return rows
 
 def fetch_all_students() -> List[sqlite3.Row]:
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM students")
-    students = cursor.fetchall()
+    rows = conn.execute("SELECT * FROM students").fetchall()
     conn.close()
-    return students
+    return rows
 
 def fetch_registrations() -> List[sqlite3.Row]:
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM registrations")
-    regs = cursor.fetchall()
+    rows = conn.execute("SELECT * FROM registrations").fetchall()
     conn.close()
-    return regs
+    return rows
 
 def fetch_feedback() -> List[sqlite3.Row]:
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM feedback")
-    feedbacks = cursor.fetchall()
+    rows = conn.execute("SELECT * FROM feedback").fetchall()
     conn.close()
-    return feedbacks
+    return rows
 
-# Initialize DB and insert dummy data (run once)
+# Run once to initialize DB and insert dummy data
 if __name__ == "__main__":
     init_db()
     insert_dummy_data()
     print("Database initialized and dummy data inserted.")
-=======
-import sqlite3
-
-conn = sqlite3.connect("events.db")
-cursor = conn.cursor()
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    date TEXT NOT NULL,
-    location TEXT,
-    description TEXT
-)
-""")
-
-conn.commit()
-conn.close()
->>>>>>> 97c3930 (feat: add Events API and initial assumptions doc)
