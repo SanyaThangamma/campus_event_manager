@@ -132,3 +132,4 @@ document.getElementById('feedbackForm').addEventListener('submit', async (e) => 
 
 // Initial fetch
 fetchEvents();
+
