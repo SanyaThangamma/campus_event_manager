@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # database.py
 import sqlite3
 from sqlite3 import Connection
@@ -132,3 +133,22 @@ if __name__ == "__main__":
     init_db()
     insert_dummy_data()
     print("Database initialized and dummy data inserted.")
+=======
+import sqlite3
+
+conn = sqlite3.connect("events.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    location TEXT,
+    description TEXT
+)
+""")
+
+conn.commit()
+conn.close()
+>>>>>>> 97c3930 (feat: add Events API and initial assumptions doc)

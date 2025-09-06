@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # main.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -110,3 +111,12 @@ def delete_event(event_id: int):
     conn.commit()
     conn.close()
     return {"message": "Event deleted"}
+=======
+from fastapi import FastAPI
+
+app = FastAPI(title="Campus Event Manager")
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to Campus Event Manager!"}
+>>>>>>> 97c3930 (feat: add Events API and initial assumptions doc)
