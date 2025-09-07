@@ -1,4 +1,4 @@
-const baseUrl = 'http://127.0.0.1:8000';
+const baseUrl = 'http://127.0.0.1:8000';  // FastAPI backend URL
 let editEventId = null;
 
 // Fetch and display all events
