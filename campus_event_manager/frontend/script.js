@@ -3,47 +3,52 @@ let editEventId = null;
 
 // Fetch and display all events
 async function fetchEvents() {
-    const res = await fetch(`${baseUrl}/events`);
-    const events = await res.json();
-    const list = document.getElementById('eventsList');
-    list.innerHTML = '';
+    try {
+        const res = await fetch(`${baseUrl}/events`);
+        const events = await res.json() || [];
+        const list = document.getElementById('eventsList');
+        list.innerHTML = '';
 
-    events.forEach(e => {
-        const li = document.createElement('li');
-        li.classList.add('event-card');
+        events.forEach(e => {
+            const li = document.createElement('li');
+            li.classList.add('event-card');
 
-        const content = document.createElement('div');
-        content.classList.add('card-content');
-        content.innerHTML = `
-            <h3>${e.name}</h3>
-            <p><strong>Date:</strong> ${e.date}</p>
-            <p><strong>Location:</strong> ${e.location}</p>
-            <p>${e.description}</p>
-            <p><strong>College ID:</strong> ${e.college_id}</p>
-        `;
+            const content = document.createElement('div');
+            content.classList.add('card-content');
+            content.innerHTML = `
+                <h3>${e.name}</h3>
+                <p><strong>Date:</strong> ${e.date}</p>
+                <p><strong>Location:</strong> ${e.location}</p>
+                <p>${e.description}</p>
+                <p><strong>College ID:</strong> ${e.college_id}</p>
+            `;
 
-        const actions = document.createElement('div');
-        actions.classList.add('card-actions');
+            const actions = document.createElement('div');
+            actions.classList.add('card-actions');
 
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Edit';
-        editBtn.onclick = () => populateFormForEdit(e);
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.onclick = () => populateFormForEdit(e);
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = async () => {
-            if (confirm(`Delete event "${e.name}"?`)) {
-                await fetch(`${baseUrl}/events/${e.id}`, { method: 'DELETE' });
-                fetchEvents();
-            }
-        };
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = async () => {
+                if (confirm(`Delete event "${e.name}"?`)) {
+                    const delRes = await fetch(`${baseUrl}/events/${e.id}`, { method: 'DELETE' });
+                    if (delRes.ok) fetchEvents();
+                    else alert("Failed to delete event.");
+                }
+            };
 
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-        li.appendChild(content);
-        li.appendChild(actions);
-        list.appendChild(li);
-    });
+            actions.appendChild(editBtn);
+            actions.appendChild(deleteBtn);
+            li.appendChild(content);
+            li.appendChild(actions);
+            list.appendChild(li);
+        });
+    } catch (err) {
+        console.error("Error fetching events:", err);
+    }
 }
 
 // Populate form for editing
@@ -67,23 +72,32 @@ document.getElementById('eventForm').addEventListener('submit', async (e) => {
         college_id: parseInt(document.getElementById('college_id').value)
     };
 
-    if (editEventId) {
-        await fetch(`${baseUrl}/events/${editEventId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newEvent)
-        });
-        editEventId = null;
-    } else {
-        await fetch(`${baseUrl}/events`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newEvent)
-        });
-    }
+    try {
+        let res;
+        if (editEventId) {
+            res = await fetch(`${baseUrl}/events/${editEventId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newEvent)
+            });
+            editEventId = null;
+        } else {
+            res = await fetch(`${baseUrl}/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newEvent)
+            });
+        }
 
-    fetchEvents();
-    e.target.reset();
+        if (res.ok) {
+            fetchEvents();
+            e.target.reset();
+        } else {
+            alert("Failed to save event!");
+        }
+    } catch (err) {
+        console.error("Error saving event:", err);
+    }
 });
 
 // Handle feedback submission
@@ -95,14 +109,21 @@ document.getElementById('feedbackForm').addEventListener('submit', async (e) => 
         feedback: document.getElementById('feedback').value
     };
 
-    await fetch(`${baseUrl}/feedback`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(feedbackData)
-    });
-
-    alert("Feedback submitted!");
-    e.target.reset();
+    try {
+        const res = await fetch(`${baseUrl}/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(feedbackData)
+        });
+        if (res.ok) {
+            alert("Feedback submitted!");
+            e.target.reset();
+        } else {
+            alert("Failed to submit feedback!");
+        }
+    } catch (err) {
+        console.error("Error submitting feedback:", err);
+    }
 });
 
 // Initial fetch
