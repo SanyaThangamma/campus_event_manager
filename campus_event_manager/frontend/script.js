@@ -130,6 +130,24 @@ document.getElementById('feedbackForm').addEventListener('submit', async (e) => 
     }
 });
 
+// Handle feedback submission
+document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const feedbackData = {
+        student_name: document.getElementById('student_name').value,
+        event_id: parseInt(document.getElementById('event_id').value),
+        feedback: document.getElementById('feedback').value
+    };
+
+    await fetch(`${baseUrl}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedbackData)
+    });
+
+    alert("Feedback submitted!");
+    e.target.reset();
+});
+
 // Initial fetch
 fetchEvents();
-

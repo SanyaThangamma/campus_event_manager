@@ -1,3 +1,4 @@
+/* General dark-themed aesthetic */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #1f1f2e, #2c2c3e);
@@ -6,7 +7,7 @@ body {
     padding: 0;
 }
 
-/* Header with logo */
+/* Header */
 .header {
     display: flex;
     align-items: center;
@@ -107,46 +108,35 @@ h2 {
     box-shadow: 0 8px 15px rgba(0,0,0,0.3);
 }
 
-.event-form input, .event-form button,
-.feedback-form input, .feedback-form textarea, .feedback-form button {
+.event-form input, .feedback-form input,
+.feedback-form textarea, .event-form button, .feedback-form button {
     padding: 12px;
     border-radius: 8px;
     border: none;
     font-size: 1em;
-}
-
-.event-form input,
-.feedback-form input,
-.feedback-form textarea {
     background: #1f1f2e;
     color: #fff;
 }
 
-.event-form input::placeholder,
-.feedback-form input::placeholder,
+.event-form input::placeholder, .feedback-form input::placeholder,
 .feedback-form textarea::placeholder {
     color: #aaa;
 }
 
-.event-form button,
-.feedback-form button {
+.event-form button, .feedback-form button {
     background: #f0a500;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.event-form button:hover,
-.feedback-form button:hover {
+.event-form button:hover, .feedback-form button:hover {
     background: #ff6b6b;
     color: #fff;
     transform: scale(1.05);
 }
 
-
 /* Feedback section */
 .feedback-section {
     margin-top: 40px;
 }
-
-
