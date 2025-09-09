@@ -1,18 +1,16 @@
-# database.py
 import sqlite3
 from sqlite3 import Connection
 from typing import List
 
-DB_PATH = "events.db"
+# DB name collegia
+DB_PATH = "collegia.db"
 
 def get_connection() -> Connection:
-    """Get a connection to the SQLite database."""
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db() -> None:
-    """Initialize the database tables."""
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -24,6 +22,7 @@ def init_db() -> None:
         date TEXT NOT NULL,
         location TEXT,
         description TEXT,
+        type TEXT,
         college_id INTEGER
     )
     """)
@@ -37,11 +36,12 @@ def init_db() -> None:
     )
     """)
 
-    # Registrations table (many-to-many relationship)
+    # Registrations table with attendance
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS registrations (
         student_id INTEGER,
         event_id INTEGER,
+        attended INTEGER DEFAULT 0,
         PRIMARY KEY (student_id, event_id),
         FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
         FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
@@ -65,31 +65,27 @@ def init_db() -> None:
     conn.close()
 
 def insert_dummy_data() -> None:
-    """Insert sample data to test the database."""
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Insert events
+    # Events
     cursor.execute("""
-    INSERT OR IGNORE INTO events (id, name, date, location, description, college_id)
-    VALUES (?, ?, ?, ?, ?, ?)""", (1, "Tech Talk", "2025-09-10", "Auditorium", "Talk on latest tech trends", 101))
-    
+    INSERT OR IGNORE INTO events (id, name, date, location, description, type, college_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)""", (1, "Tech Talk", "2025-09-10", "Auditorium", "Talk on latest tech trends", "Seminar", 101))
     cursor.execute("""
-    INSERT OR IGNORE INTO events (id, name, date, location, description, college_id)
-    VALUES (?, ?, ?, ?, ?, ?)""", (2, "Python Workshop", "2025-09-12", "Lab 1", "Hands-on Python workshop", 101))
+    INSERT OR IGNORE INTO events (id, name, date, location, description, type, college_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)""", (2, "Python Workshop", "2025-09-12", "Lab 1", "Hands-on Python workshop", "Workshop", 101))
 
-    # Insert students
-    cursor.execute("""
-    INSERT OR IGNORE INTO students (id, name, email) VALUES (?, ?, ?)""", (1, "Alice", "alice@example.com"))
-    cursor.execute("""
-    INSERT OR IGNORE INTO students (id, name, email) VALUES (?, ?, ?)""", (2, "Bob", "bob@example.com"))
+    # Students
+    cursor.execute("""INSERT OR IGNORE INTO students (id, name, email) VALUES (?, ?, ?)""", (1, "Alice", "alice@example.com"))
+    cursor.execute("""INSERT OR IGNORE INTO students (id, name, email) VALUES (?, ?, ?)""", (2, "Bob", "bob@example.com"))
 
-    # Register students for events
-    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id) VALUES (?, ?)", (1, 1))
-    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id) VALUES (?, ?)", (2, 1))
-    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id) VALUES (?, ?)", (1, 2))
+    # Registrations
+    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (?, ?, ?)", (1, 1, 1))
+    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (?, ?, ?)", (2, 1, 0))
+    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (?, ?, ?)", (1, 2, 1))
 
-    # Insert feedback
+    # Feedback
     cursor.execute("INSERT OR IGNORE INTO feedback (student_id, event_id, rating, comments) VALUES (?, ?, ?, ?)",
                 (1, 1, 5, "Great event!"))
     cursor.execute("INSERT OR IGNORE INTO feedback (student_id, event_id, rating, comments) VALUES (?, ?, ?, ?)",
@@ -98,33 +94,7 @@ def insert_dummy_data() -> None:
     conn.commit()
     conn.close()
 
-# Fetch functions
-def fetch_all_events() -> List[sqlite3.Row]:
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM events").fetchall()
-    conn.close()
-    return rows
-
-def fetch_all_students() -> List[sqlite3.Row]:
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM students").fetchall()
-    conn.close()
-    return rows
-
-def fetch_registrations() -> List[sqlite3.Row]:
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM registrations").fetchall()
-    conn.close()
-    return rows
-
-def fetch_feedback() -> List[sqlite3.Row]:
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM feedback").fetchall()
-    conn.close()
-    return rows
-
-# Run once to initialize DB and insert dummy data
 if __name__ == "__main__":
     init_db()
     insert_dummy_data()
-    print("Database initialized and dummy data inserted.")
+    print("Collegia database initialized with dummy data.")

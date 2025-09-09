@@ -1,148 +1,130 @@
-# main.py
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Optional, List
-import sqlite3
+import database
 
-# ----- Database setup -----
-DB_NAME = "events.db"
+app = FastAPI(title="Collegia - College Event Manager")
 
-def get_connection():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    return conn
+# Models
+class Event(BaseModel):
+    name: str
+    date: str
+    location: str
+    description: str
+    type: str
+    college_id: int
 
-def init_db():
-    conn = get_connection()
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS events (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        date TEXT NOT NULL,
-        location TEXT,
-        description TEXT,
-        college_id INTEGER
-    )
-    """)
+class Student(BaseModel):
+    name: str
+    email: str
+
+class Feedback(BaseModel):
+    student_id: int
+    event_id: int
+    rating: int
+    comments: str
+
+# CRUD Events
+@app.get("/events")
+def get_events():
+    return database.fetch_all_events()
+
+@app.post("/events")
+def create_event(event: Event):
+    conn = database.get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO events (name, date, location, description, type, college_id) VALUES (?, ?, ?, ?, ?, ?)",
+                (event.name, event.date, event.location, event.description, event.type, event.college_id))
     conn.commit()
     conn.close()
+    return {"message": "Event created successfully"}
 
-def fetch_all_events():
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM events").fetchall()
+# CRUD Students
+@app.get("/students")
+def get_students():
+    return database.fetch_all_students()
+
+@app.post("/students")
+def create_student(student: Student):
+    conn = database.get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO students (name, email) VALUES (?, ?)", (student.name, student.email))
+    conn.commit()
+    conn.close()
+    return {"message": "Student created successfully"}
+
+# Registration
+@app.post("/register")
+def register(student_id: int, event_id: int):
+    conn = database.get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (?, ?, ?)", (student_id, event_id, 0))
+    conn.commit()
+    conn.close()
+    return {"message": "Student registered"}
+
+# Attendance
+@app.patch("/attendance")
+def mark_attendance(student_id: int, event_id: int):
+    conn = database.get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE registrations SET attended = 1 WHERE student_id = ? AND event_id = ?", (student_id, event_id))
+    conn.commit()
+    conn.close()
+    return {"message": "Attendance marked"}
+
+# Feedback
+@app.post("/feedback")
+def feedback(feedback: Feedback):
+    conn = database.get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR REPLACE INTO feedback (student_id, event_id, rating, comments) VALUES (?, ?, ?, ?)",
+                (feedback.student_id, feedback.event_id, feedback.rating, feedback.comments))
+    conn.commit()
+    conn.close()
+    return {"message": "Feedback submitted"}
+
+# Reports
+@app.get("/reports/registrations")
+def registrations_report():
+    conn = database.get_connection()
+    rows = conn.execute("SELECT event_id, COUNT(*) as total FROM registrations GROUP BY event_id").fetchall()
     conn.close()
     return rows
 
-# ----- Pydantic Models -----
-class EventCreate(BaseModel):
-    name: str
-    date: str
-    location: Optional[str] = ""
-    description: Optional[str] = ""
-    college_id: Optional[int] = None
-
-class EventUpdate(BaseModel):
-    name: Optional[str] = None
-    date: Optional[str] = None
-    location: Optional[str] = None
-    description: Optional[str] = None
-    college_id: Optional[int] = None
-
-class EventOut(BaseModel):
-    id: int
-    name: str
-    date: str
-    location: Optional[str] = None
-    description: Optional[str] = None
-    college_id: Optional[int] = None
-
-# ----- FastAPI App -----
-app = FastAPI(title="Campus Event Manager")
-
-# --- CORS middleware ---
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (good for testing)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ----- Initialize DB on startup -----
-@app.on_event("startup")
-def startup_event():
-    init_db()
-
-# ----- Helper -----
-def row_to_dict(row):
-    if row is None:
-        return None
-    return {k: row[k] for k in row.keys()}
-
-# ----- Routes -----
-@app.get("/", summary="Root")
-def read_root():
-    return {"message": "Welcome to Campus Event Manager!"}
-
-@app.get("/events", response_model=List[EventOut], summary="List all events")
-def list_events(college_id: Optional[int] = None):
-    events = fetch_all_events()
-    if college_id is not None:
-        events = [e for e in events if e["college_id"] == college_id]
-    return [dict(e) for e in events]
-
-@app.post("/events", response_model=EventOut, summary="Create event")
-def create_event(e: EventCreate):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO events (name, date, location, description, college_id) VALUES (?, ?, ?, ?, ?)",
-        (e.name, e.date, e.location, e.description, e.college_id),
-    )
-    conn.commit()
-    event_id = cur.lastrowid
-    row = conn.execute("SELECT * FROM events WHERE id = ?", (event_id,)).fetchone()
+@app.get("/reports/attendance")
+def attendance_report():
+    conn = database.get_connection()
+    rows = conn.execute("""
+        SELECT event_id, ROUND(SUM(attended)*100.0/COUNT(*),2) as percentage
+        FROM registrations GROUP BY event_id
+    """).fetchall()
     conn.close()
-    return row_to_dict(row)
+    return rows
 
-@app.get("/events/{event_id}", response_model=EventOut, summary="Get event by ID")
-def get_event(event_id: int):
-    conn = get_connection()
-    row = conn.execute("SELECT * FROM events WHERE id = ?", (event_id,)).fetchone()
+@app.get("/reports/feedback")
+def feedback_report():
+    conn = database.get_connection()
+    rows = conn.execute("SELECT event_id, ROUND(AVG(rating),2) as avg_feedback FROM feedback GROUP BY event_id").fetchall()
     conn.close()
-    if not row:
-        raise HTTPException(status_code=404, detail="Event not found")
-    return row_to_dict(row)
+    return rows
 
-@app.put("/events/{event_id}", response_model=EventOut, summary="Update event")
-def update_event(event_id: int, e: EventUpdate):
-    conn = get_connection()
-    row = conn.execute("SELECT * FROM events WHERE id = ?", (event_id,)).fetchone()
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Event not found")
-
-    # Dynamically update fields
-    fields = {f: getattr(e, f) for f in ["name", "date", "location", "description", "college_id"] if getattr(e, f) is not None}
-    if fields:
-        set_clause = ", ".join([f"{k} = ?" for k in fields.keys()])
-        params = list(fields.values()) + [event_id]
-        conn.execute(f"UPDATE events SET {set_clause} WHERE id = ?", params)
-        conn.commit()
-
-    row = conn.execute("SELECT * FROM events WHERE id = ?", (event_id,)).fetchone()
+@app.get("/reports/top_students")
+def top_students():
+    conn = database.get_connection()
+    rows = conn.execute("""
+        SELECT s.name, COUNT(r.event_id) as events_attended
+        FROM students s
+        JOIN registrations r ON s.id = r.student_id
+        GROUP BY s.id
+        ORDER BY events_attended DESC
+        LIMIT 3
+    """).fetchall()
     conn.close()
-    return row_to_dict(row)
+    return rows
 
-@app.delete("/events/{event_id}", summary="Delete event")
-def delete_event(event_id: int):
-    conn = get_connection()
-    row = conn.execute("SELECT * FROM events WHERE id = ?", (event_id,)).fetchone()
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Event not found")
-    conn.execute("DELETE FROM events WHERE id = ?", (event_id,))
-    conn.commit()
+@app.get("/reports/event_type")
+def filter_by_type(event_type: str):
+    conn = database.get_connection()
+    rows = conn.execute("SELECT * FROM events WHERE type = ?", (event_type,)).fetchall()
     conn.close()
-    return {"message": "Event deleted successfully"}
+    return rows
