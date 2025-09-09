@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import database
+from typing import List, Dict
 
 # Initialize FastAPI app
 app = FastAPI(title="Collegia - College Event Manager")
@@ -15,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Models
+# ---------------- Models ----------------
 class Event(BaseModel):
     name: str
     date: str
@@ -35,7 +36,7 @@ class Feedback(BaseModel):
     comments: str
 
 # ---------------- CRUD EVENTS ----------------
-@app.get("/events")
+@app.get("/events", response_model=List[Dict])
 def get_events():
     return database.fetch_all_events()
 
@@ -48,11 +49,12 @@ def create_event(event: Event):
         (event.name, event.date, event.location, event.description, event.type, event.college_id)
     )
     conn.commit()
+    event_id = cursor.lastrowid
     conn.close()
-    return {"message": "Event created successfully"}
+    return {**event.dict(), "id": event_id, "message": "Event created successfully"}
 
 # ---------------- CRUD STUDENTS ----------------
-@app.get("/students")
+@app.get("/students", response_model=List[Dict])
 def get_students():
     return database.fetch_all_students()
 
@@ -62,8 +64,9 @@ def create_student(student: Student):
     cursor = conn.cursor()
     cursor.execute("INSERT INTO students (name, email) VALUES (?, ?)", (student.name, student.email))
     conn.commit()
+    student_id = cursor.lastrowid
     conn.close()
-    return {"message": "Student created successfully"}
+    return {"id": student_id, **student.dict(), "message": "Student created successfully"}
 
 # ---------------- REGISTRATION ----------------
 @app.post("/register")
@@ -105,31 +108,34 @@ def feedback(feedback: Feedback):
     return {"message": "Feedback submitted"}
 
 # ---------------- REPORTS ----------------
-@app.get("/reports/registrations")
+@app.get("/reports/registrations", response_model=List[Dict])
 def registrations_report():
     conn = database.get_connection()
     rows = conn.execute("SELECT event_id, COUNT(*) as total FROM registrations GROUP BY event_id").fetchall()
+    result = [{"event_id": row[0], "total_registrations": row[1]} for row in rows]
     conn.close()
-    return rows
+    return result
 
-@app.get("/reports/attendance")
+@app.get("/reports/attendance", response_model=List[Dict])
 def attendance_report():
     conn = database.get_connection()
     rows = conn.execute("""
         SELECT event_id, ROUND(SUM(attended)*100.0/COUNT(*),2) as percentage
         FROM registrations GROUP BY event_id
     """).fetchall()
+    result = [{"event_id": row[0], "attendance_percentage": row[1]} for row in rows]
     conn.close()
-    return rows
+    return result
 
-@app.get("/reports/feedback")
+@app.get("/reports/feedback", response_model=List[Dict])
 def feedback_report():
     conn = database.get_connection()
     rows = conn.execute("SELECT event_id, ROUND(AVG(rating),2) as avg_feedback FROM feedback GROUP BY event_id").fetchall()
+    result = [{"event_id": row[0], "avg_feedback": row[1]} for row in rows]
     conn.close()
-    return rows
+    return result
 
-@app.get("/reports/top_students")
+@app.get("/reports/top_students", response_model=List[Dict])
 def top_students():
     conn = database.get_connection()
     rows = conn.execute("""
@@ -140,12 +146,24 @@ def top_students():
         ORDER BY events_attended DESC
         LIMIT 3
     """).fetchall()
+    result = [{"name": row[0], "events_attended": row[1]} for row in rows]
     conn.close()
-    return rows
+    return result
 
-@app.get("/reports/event_type")
+@app.get("/reports/event_type", response_model=List[Dict])
 def filter_by_type(event_type: str):
     conn = database.get_connection()
     rows = conn.execute("SELECT * FROM events WHERE type = ?", (event_type,)).fetchall()
+    result = [
+        {
+            "id": row[0],
+            "name": row[1],
+            "date": row[2],
+            "location": row[3],
+            "description": row[4],
+            "type": row[5],
+            "college_id": row[6]
+        } for row in rows
+    ]
     conn.close()
-    return rows
+    return result
