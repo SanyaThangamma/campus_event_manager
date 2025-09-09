@@ -59,7 +59,7 @@ async function fetchEvents() {
 }
 
 /* -----------------------------
-   Populate form for editing
+Populate form for editing
 ------------------------------*/
 function populateFormForEdit(event) {
     editEventId = event.id;
@@ -72,7 +72,7 @@ function populateFormForEdit(event) {
 }
 
 /* -----------------------------
-   Handle event form submission
+Handle event form submission
 ------------------------------*/
 document.getElementById('eventForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -115,7 +115,7 @@ document.getElementById('eventForm').addEventListener('submit', async (e) => {
 });
 
 /* -----------------------------
-   Handle feedback submission
+Handle feedback submission
 ------------------------------*/
 document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
     e.preventDefault();
