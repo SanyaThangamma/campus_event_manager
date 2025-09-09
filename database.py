@@ -1,14 +1,22 @@
 import sqlite3
 from sqlite3 import Connection
+from typing import List, Dict
 
 DB_PATH = "collegia.db"
 
+# ---------------- DATABASE CONNECTION ----------------
 def get_connection() -> Connection:
+    """
+    Returns a SQLite connection object with row_factory set to Row
+    so that results can be accessed like dictionaries.
+    """
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
+# ---------------- INITIALIZATION ----------------
 def init_db() -> None:
+    """Create tables if they do not exist"""
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -61,8 +69,11 @@ def init_db() -> None:
 
     conn.commit()
     conn.close()
+    print("Database initialized successfully.")
 
+# ---------------- DUMMY DATA ----------------
 def insert_dummy_data() -> None:
+    """Insert some sample events, students, registrations, and feedback"""
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -87,8 +98,22 @@ def insert_dummy_data() -> None:
 
     conn.commit()
     conn.close()
+    print("Dummy data inserted successfully.")
 
+# ---------------- FETCH FUNCTIONS ----------------
+def fetch_all_events() -> List[Dict]:
+    conn = get_connection()
+    rows = conn.execute("SELECT * FROM events").fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def fetch_all_students() -> List[Dict]:
+    conn = get_connection()
+    rows = conn.execute("SELECT * FROM students").fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+# ---------------- MAIN ----------------
 if __name__ == "__main__":
     init_db()
     insert_dummy_data()
-    print("Collegia database initialized with dummy data.")
