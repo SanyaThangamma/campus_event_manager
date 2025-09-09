@@ -1,176 +1,159 @@
-
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    color: #f5f5f5;
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
-}
-
-/* Header */
-.header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    padding: 25px 0;
-    background: linear-gradient(90deg, #ff6b6b, #f0a500);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.header h1 {
-    font-size: 2.2em;
-    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #1e1e2e;
     color: #fff;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
 }
 
-.logo {
-    width: 55px;
-    height: 55px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+/* Dashboard layout */
+.dashboard {
+    display: flex;
+    height: 100vh;
 }
 
-/* Container */
-.container {
-    max-width: 1100px;
-    margin: 40px auto;
-    padding: 0 20px;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 40px;
-}
-
-/* Section titles */
-h2 {
-    color: #f0a500;
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.6em;
-    font-weight: 600;
-    text-shadow: 1px 1px 5px rgba(0,0,0,0.4);
-}
-
-/* Event cards grid */
-#eventsList {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-}
-
-.event-card {
-    background: rgba(44, 44, 62, 0.8);
-    border-radius: 15px;
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background: #111;
     padding: 20px;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.35);
-    backdrop-filter: blur(10px);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.event-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.5);
-}
-
-.card-content h3 {
-    margin-top: 0;
-    color: #ff6b6b;
-    font-size: 1.3em;
-}
-
-.card-content p {
-    margin: 6px 0;
-    color: #ddd;
-    font-size: 0.95em;
-}
-
-.card-actions {
-    margin-top: 15px;
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    flex-direction: column;
+    gap: 20px;
+    border-right: 4px solid #444;
 }
-
-.card-actions button {
-    background: #f0a500;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #000;
-    font-weight: 600;
-    font-size: 0.9em;
-    transition: all 0.3s ease;
+.sidebar h2 {
+    color: #facc15;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
 }
-
-.card-actions button:hover {
-    background: #ff6b6b;
-    color: #fff;
-    transform: scale(1.08);
-}
-
-/* Forms */
-.event-form, .feedback-form {
+.nav-links {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    background: rgba(44, 44, 62, 0.85);
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.35);
-    backdrop-filter: blur(12px);
+}
+.nav-links a {
+    text-decoration: none;
+    padding: 10px;
+    font-weight: bold;
+    color: #bbb;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+.nav-links a.active,
+.nav-links a:hover {
+    background: #facc15;
+    color: #000;
+    border: 2px solid #000;
 }
 
-.event-form input, .feedback-form input,
-.feedback-form textarea, .event-form button, .feedback-form button {
-    padding: 12px;
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Card Style */
+.card {
+    background: #2a2a40;
+    padding: 20px;
+    border: 3px solid #444;
     border-radius: 10px;
+}
+.card h1,
+.card h2 {
+    margin-bottom: 15px;
+    color: #facc15;
+}
+
+/* Card Grid */
+.card-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+.card-grid li {
+    background: #111;
+    padding: 15px;
+    border: 2px solid #555;
+    border-radius: 8px;
+    transition: 0.3s ease;
+}
+.card-grid li:hover {
+    background: #333;
+    transform: translateY(-3px);
+}
+
+/* Card Actions */
+.card-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+.card-actions button {
+    padding: 8px 12px;
     border: none;
-    font-size: 1em;
-    background: rgba(31, 31, 46, 0.9);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.card-actions button:first-child {
+    background: #3b82f6;
     color: #fff;
-    outline: none;
-    transition: all 0.3s ease;
+}
+.card-actions button:last-child {
+    background: #ef4444;
+    color: #fff;
+}
+.card-actions button:hover:first-child {
+    background: #2563eb;
+}
+.card-actions button:hover:last-child {
+    background: #dc2626;
 }
 
-.event-form input:focus, .feedback-form input:focus,
-.feedback-form textarea:focus {
-    border: 1px solid #f0a500;
-    background: rgba(31, 31, 46, 1);
-    box-shadow: 0 0 8px rgba(240, 165, 0, 0.7);
+/* Forms */
+.form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
-
-.event-form input::placeholder, .feedback-form input::placeholder,
-.feedback-form textarea::placeholder {
-    color: #aaa;
+.form input,
+.form textarea,
+.form select,
+.form button {
+    padding: 12px;
+    border: 2px solid #444;
+    border-radius: 6px;
+    background: #111;
+    color: #fff;
+    font-size: 1rem;
 }
-
-.event-form button, .feedback-form button {
-    background: linear-gradient(90deg, #f0a500, #ff6b6b);
+.form input::placeholder,
+.form textarea::placeholder {
+    color: #777;
+}
+.form button {
+    background: #facc15;
+    color: #000;
     font-weight: bold;
     cursor: pointer;
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    transition: all 0.3s ease;
+    transition: 0.3s;
 }
-
-.event-form button:hover, .feedback-form button:hover {
-    background: linear-gradient(90deg, #ff6b6b, #f0a500);
+.form button:hover {
+    background: #ff6b6b;
+    border-color: #000;
     color: #fff;
-    transform: scale(1.05);
-}
-
-/* Feedback section spacing */
-.feedback-section {
-    margin-top: 20px;
 }

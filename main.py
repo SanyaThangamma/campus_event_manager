@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import database
 from typing import List, Dict
 
-# Initialize FastAPI app
+# ---------------- FastAPI App ----------------
 app = FastAPI(title="Collegia - College Event Manager")
 
 # Enable CORS for frontend
@@ -42,15 +42,14 @@ def get_events():
 
 @app.post("/events")
 def create_event(event: Event):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO events (name, date, location, description, type, college_id) VALUES (?, ?, ?, ?, ?, ?)",
-        (event.name, event.date, event.location, event.description, event.type, event.college_id)
-    )
-    conn.commit()
-    event_id = cursor.lastrowid
-    conn.close()
+    with database.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO events (name, date, location, description, type, college_id) VALUES (?, ?, ?, ?, ?, ?)",
+            (event.name, event.date, event.location, event.description, event.type, event.college_id)
+        )
+        conn.commit()
+        event_id = cursor.lastrowid
     return {**event.dict(), "id": event_id, "message": "Event created successfully"}
 
 # ---------------- CRUD STUDENTS ----------------
@@ -60,101 +59,91 @@ def get_students():
 
 @app.post("/students")
 def create_student(student: Student):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO students (name, email) VALUES (?, ?)", (student.name, student.email))
-    conn.commit()
-    student_id = cursor.lastrowid
-    conn.close()
+    with database.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO students (name, email) VALUES (?, ?)", (student.name, student.email))
+        conn.commit()
+        student_id = cursor.lastrowid
     return {"id": student_id, **student.dict(), "message": "Student created successfully"}
 
 # ---------------- REGISTRATION ----------------
 @app.post("/register")
 def register(student_id: int, event_id: int):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (?, ?, ?)",
-        (student_id, event_id, 0)
-    )
-    conn.commit()
-    conn.close()
+    with database.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (?, ?, ?)",
+            (student_id, event_id, 0)
+        )
+        conn.commit()
     return {"message": "Student registered"}
 
 # ---------------- ATTENDANCE ----------------
 @app.patch("/attendance")
 def mark_attendance(student_id: int, event_id: int):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE registrations SET attended = 1 WHERE student_id = ? AND event_id = ?",
-        (student_id, event_id)
-    )
-    conn.commit()
-    conn.close()
+    with database.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE registrations SET attended = 1 WHERE student_id = ? AND event_id = ?",
+            (student_id, event_id)
+        )
+        conn.commit()
     return {"message": "Attendance marked"}
 
 # ---------------- FEEDBACK ----------------
 @app.post("/feedback")
 def feedback(feedback: Feedback):
-    conn = database.get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT OR REPLACE INTO feedback (student_id, event_id, rating, comments) VALUES (?, ?, ?, ?)",
-        (feedback.student_id, feedback.event_id, feedback.rating, feedback.comments)
-    )
-    conn.commit()
-    conn.close()
+    with database.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT OR REPLACE INTO feedback (student_id, event_id, rating, comments) VALUES (?, ?, ?, ?)",
+            (feedback.student_id, feedback.event_id, feedback.rating, feedback.comments)
+        )
+        conn.commit()
     return {"message": "Feedback submitted"}
 
 # ---------------- REPORTS ----------------
 @app.get("/reports/registrations", response_model=List[Dict])
 def registrations_report():
-    conn = database.get_connection()
-    rows = conn.execute("SELECT event_id, COUNT(*) as total FROM registrations GROUP BY event_id").fetchall()
-    result = [{"event_id": row[0], "total_registrations": row[1]} for row in rows]
-    conn.close()
-    return result
+    with database.get_connection() as conn:
+        rows = conn.execute("SELECT event_id, COUNT(*) as total FROM registrations GROUP BY event_id").fetchall()
+    return [{"event_id": row[0], "total_registrations": row[1]} for row in rows]
 
 @app.get("/reports/attendance", response_model=List[Dict])
 def attendance_report():
-    conn = database.get_connection()
-    rows = conn.execute("""
-        SELECT event_id, ROUND(SUM(attended)*100.0/COUNT(*),2) as percentage
-        FROM registrations GROUP BY event_id
-    """).fetchall()
-    result = [{"event_id": row[0], "attendance_percentage": row[1]} for row in rows]
-    conn.close()
-    return result
+    with database.get_connection() as conn:
+        rows = conn.execute("""
+            SELECT event_id, ROUND(SUM(attended)*100.0/COUNT(*),2) as percentage
+            FROM registrations GROUP BY event_id
+        """).fetchall()
+    return [{"event_id": row[0], "attendance_percentage": row[1]} for row in rows]
 
 @app.get("/reports/feedback", response_model=List[Dict])
 def feedback_report():
-    conn = database.get_connection()
-    rows = conn.execute("SELECT event_id, ROUND(AVG(rating),2) as avg_feedback FROM feedback GROUP BY event_id").fetchall()
-    result = [{"event_id": row[0], "avg_feedback": row[1]} for row in rows]
-    conn.close()
-    return result
+    with database.get_connection() as conn:
+        rows = conn.execute(
+            "SELECT event_id, ROUND(AVG(rating),2) as avg_feedback FROM feedback GROUP BY event_id"
+        ).fetchall()
+    return [{"event_id": row[0], "avg_feedback": row[1]} for row in rows]
 
 @app.get("/reports/top_students", response_model=List[Dict])
 def top_students():
-    conn = database.get_connection()
-    rows = conn.execute("""
-        SELECT s.name, COUNT(r.event_id) as events_attended
-        FROM students s
-        JOIN registrations r ON s.id = r.student_id
-        GROUP BY s.id
-        ORDER BY events_attended DESC
-        LIMIT 3
-    """).fetchall()
-    result = [{"name": row[0], "events_attended": row[1]} for row in rows]
-    conn.close()
-    return result
+    with database.get_connection() as conn:
+        rows = conn.execute("""
+            SELECT s.name, COUNT(r.event_id) as events_attended
+            FROM students s
+            JOIN registrations r ON s.id = r.student_id
+            GROUP BY s.id
+            ORDER BY events_attended DESC
+            LIMIT 3
+        """).fetchall()
+    return [{"name": row[0], "events_attended": row[1]} for row in rows]
 
 @app.get("/reports/event_type", response_model=List[Dict])
 def filter_by_type(event_type: str):
-    conn = database.get_connection()
-    rows = conn.execute("SELECT * FROM events WHERE type = ?", (event_type,)).fetchall()
-    result = [
+    with database.get_connection() as conn:
+        rows = conn.execute("SELECT * FROM events WHERE type = ?", (event_type,)).fetchall()
+    return [
         {
             "id": row[0],
             "name": row[1],
@@ -165,5 +154,3 @@ def filter_by_type(event_type: str):
             "college_id": row[6]
         } for row in rows
     ]
-    conn.close()
-    return result

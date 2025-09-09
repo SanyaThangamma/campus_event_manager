@@ -17,100 +17,100 @@ def get_connection() -> Connection:
 # ---------------- INITIALIZATION ----------------
 def init_db() -> None:
     """Create tables if they do not exist"""
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    # Events table
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS events (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        date TEXT NOT NULL,
-        location TEXT,
-        description TEXT,
-        type TEXT,
-        college_id INTEGER
-    )
-    """)
+        # Events table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                date TEXT NOT NULL,
+                location TEXT,
+                description TEXT,
+                type TEXT,
+                college_id INTEGER
+            )
+        """)
 
-    # Students table
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL
-    )
-    """)
+        # Students table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS students (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL
+            )
+        """)
 
-    # Registrations table
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS registrations (
-        student_id INTEGER,
-        event_id INTEGER,
-        attended INTEGER DEFAULT 0,
-        PRIMARY KEY (student_id, event_id),
-        FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
-        FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-    )
-    """)
+        # Registrations table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS registrations (
+                student_id INTEGER,
+                event_id INTEGER,
+                attended INTEGER DEFAULT 0,
+                PRIMARY KEY (student_id, event_id),
+                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+                FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+            )
+        """)
 
-    # Feedback table
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS feedback (
-        student_id INTEGER,
-        event_id INTEGER,
-        rating INTEGER CHECK(rating BETWEEN 1 AND 5),
-        comments TEXT,
-        PRIMARY KEY (student_id, event_id),
-        FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
-        FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-    )
-    """)
+        # Feedback table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS feedback (
+                student_id INTEGER,
+                event_id INTEGER,
+                rating INTEGER CHECK(rating BETWEEN 1 AND 5),
+                comments TEXT,
+                PRIMARY KEY (student_id, event_id),
+                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+                FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+            )
+        """)
 
-    conn.commit()
-    conn.close()
+        conn.commit()
     print("Database initialized successfully.")
 
 # ---------------- DUMMY DATA ----------------
 def insert_dummy_data() -> None:
     """Insert some sample events, students, registrations, and feedback"""
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
 
-    # Events
-    cursor.execute("""INSERT OR IGNORE INTO events (id, name, date, location, description, type, college_id)
-                      VALUES (1, "Tech Talk", "2025-09-10", "Auditorium", "Talk on latest tech trends", "Seminar", 101)""")
-    cursor.execute("""INSERT OR IGNORE INTO events (id, name, date, location, description, type, college_id)
-                      VALUES (2, "Python Workshop", "2025-09-12", "Lab 1", "Hands-on Python workshop", "Workshop", 101)""")
+        # Events
+        cursor.execute("""
+            INSERT OR IGNORE INTO events (id, name, date, location, description, type, college_id)
+            VALUES (1, 'Tech Talk', '2025-09-10', 'Auditorium', 'Talk on latest tech trends', 'Seminar', 101)
+        """)
+        cursor.execute("""
+            INSERT OR IGNORE INTO events (id, name, date, location, description, type, college_id)
+            VALUES (2, 'Python Workshop', '2025-09-12', 'Lab 1', 'Hands-on Python workshop', 'Workshop', 101)
+        """)
 
-    # Students
-    cursor.execute("""INSERT OR IGNORE INTO students (id, name, email) VALUES (1, "Alice", "alice@example.com")""")
-    cursor.execute("""INSERT OR IGNORE INTO students (id, name, email) VALUES (2, "Bob", "bob@example.com")""")
+        # Students
+        cursor.execute("INSERT OR IGNORE INTO students (id, name, email) VALUES (1, 'Alice', 'alice@example.com')")
+        cursor.execute("INSERT OR IGNORE INTO students (id, name, email) VALUES (2, 'Bob', 'bob@example.com')")
 
-    # Registrations
-    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (1, 1, 1)")
-    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (2, 1, 0)")
-    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (1, 2, 1)")
+        # Registrations
+        cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (1, 1, 1)")
+        cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (2, 1, 0)")
+        cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (1, 2, 1)")
 
-    # Feedback
-    cursor.execute("INSERT OR IGNORE INTO feedback (student_id, event_id, rating, comments) VALUES (1, 1, 5, 'Great event!')")
-    cursor.execute("INSERT OR IGNORE INTO feedback (student_id, event_id, rating, comments) VALUES (2, 1, 4, 'Informative session')")
+        # Feedback
+        cursor.execute("INSERT OR IGNORE INTO feedback (student_id, event_id, rating, comments) VALUES (1, 1, 5, 'Great event!')")
+        cursor.execute("INSERT OR IGNORE INTO feedback (student_id, event_id, rating, comments) VALUES (2, 1, 4, 'Informative session')")
 
-    conn.commit()
-    conn.close()
+        conn.commit()
     print("Dummy data inserted successfully.")
 
 # ---------------- FETCH FUNCTIONS ----------------
 def fetch_all_events() -> List[Dict]:
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM events").fetchall()
-    conn.close()
+    with get_connection() as conn:
+        rows = conn.execute("SELECT * FROM events").fetchall()
     return [dict(row) for row in rows]
 
 def fetch_all_students() -> List[Dict]:
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM students").fetchall()
-    conn.close()
+    with get_connection() as conn:
+        rows = conn.execute("SELECT * FROM students").fetchall()
     return [dict(row) for row in rows]
 
 # ---------------- MAIN ----------------
