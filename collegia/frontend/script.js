@@ -1,9 +1,8 @@
-const baseUrl = 'http://127.0.0.1:8000';  // Collegia backend URL
+// Base URL of the FastAPI backend
+const baseUrl = 'http://127.0.0.1:8000';  
 let editEventId = null;
 
-/* -----------------------------
-   Fetch and display all events
-------------------------------*/
+// ---------------- FETCH AND DISPLAY EVENTS ----------------
 async function fetchEvents() {
     try {
         const res = await fetch(`${baseUrl}/events`);
@@ -23,7 +22,7 @@ async function fetchEvents() {
                 <p><strong>Location:</strong> ${e.location || '-'}</p>
                 <p>${e.description || ''}</p>
                 <p><strong>College ID:</strong> ${e.college_id}</p>
-                <p><strong>Type:</strong> ${e.type || 'General'}</p>
+                <p><strong>Type:</strong> ${e.type}</p>
             `;
 
             const actions = document.createElement('div');
@@ -36,11 +35,11 @@ async function fetchEvents() {
             const deleteBtn = document.createElement('button');
             deleteBtn.textContent = 'Delete';
             deleteBtn.onclick = async () => {
-                if (confirm(`Are you sure you want to delete "${e.name}"?`)) {
+                if (confirm(`Delete event "${e.name}"?`)) {
                     try {
                         const delRes = await fetch(`${baseUrl}/events/${e.id}`, { method: 'DELETE' });
                         if (delRes.ok) fetchEvents();
-                        else alert("⚠️ Could not delete event. Please try again.");
+                        else alert("Failed to delete event.");
                     } catch (err) {
                         console.error("Error deleting event:", err);
                     }
@@ -58,9 +57,7 @@ async function fetchEvents() {
     }
 }
 
-/* -----------------------------
-Populate form for editing
-------------------------------*/
+// ---------------- POPULATE FORM FOR EDITING ----------------
 function populateFormForEdit(event) {
     editEventId = event.id;
     document.getElementById('name').value = event.name;
@@ -68,12 +65,9 @@ function populateFormForEdit(event) {
     document.getElementById('location').value = event.location;
     document.getElementById('description').value = event.description;
     document.getElementById('college_id').value = event.college_id;
-    document.getElementById('type').value = event.type || 'General';
 }
 
-/* -----------------------------
-Handle event form submission
-------------------------------*/
+// ---------------- HANDLE EVENT FORM SUBMISSION ----------------
 document.getElementById('eventForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const newEvent = {
@@ -82,7 +76,7 @@ document.getElementById('eventForm').addEventListener('submit', async (e) => {
         location: document.getElementById('location').value,
         description: document.getElementById('description').value,
         college_id: parseInt(document.getElementById('college_id').value),
-        type: document.getElementById('type').value || "General"
+        type: "General"  // Default type
     };
 
     try {
@@ -105,24 +99,21 @@ document.getElementById('eventForm').addEventListener('submit', async (e) => {
         if (res.ok) {
             fetchEvents();
             e.target.reset();
-            alert("✅ Event saved successfully in Collegia!");
         } else {
-            alert("⚠️ Failed to save event!");
+            alert("Failed to save event!");
         }
     } catch (err) {
         console.error("Error saving event:", err);
     }
 });
 
-/* -----------------------------
-Handle feedback submission
-------------------------------*/
+// ---------------- HANDLE FEEDBACK FORM SUBMISSION ----------------
 document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const feedbackData = {
-        student_id: 1, // TODO: replace with logged-in student ID
+        student_id: 1, // TODO: replace with actual logged-in student
         event_id: parseInt(document.getElementById('event_id').value),
-        rating: 5, // Default rating (later can add stars UI)
+        rating: 5,     // Default rating
         comments: document.getElementById('feedback').value
     };
 
@@ -133,17 +124,15 @@ document.getElementById('feedbackForm').addEventListener('submit', async (e) => 
             body: JSON.stringify(feedbackData)
         });
         if (res.ok) {
-            alert("✅ Feedback submitted successfully!");
+            alert("Feedback submitted!");
             e.target.reset();
         } else {
-            alert("⚠️ Failed to submit feedback!");
+            alert("Failed to submit feedback!");
         }
     } catch (err) {
         console.error("Error submitting feedback:", err);
     }
 });
 
-/* -----------------------------
-Initial fetch
-------------------------------*/
+// ---------------- INITIAL FETCH ----------------
 fetchEvents();

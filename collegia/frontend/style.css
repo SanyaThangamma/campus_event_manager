@@ -1,7 +1,7 @@
-
+/* General dark-themed aesthetic */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #161625, #2a2a3b);
+    background: linear-gradient(135deg, #1f1f2e, #2c2c3e);
     color: #fff;
     margin: 0;
     padding: 0;
@@ -14,7 +14,7 @@ body {
     justify-content: center;
     gap: 15px;
     padding: 30px 0;
-    background: linear-gradient(90deg, #6a11cb, #2575fc); /* Collegia theme colors */
+    background: linear-gradient(90deg, #ff6b6b, #f0a500);
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
@@ -41,7 +41,7 @@ body {
 
 /* Section titles */
 h2 {
-    color: #6a11cb; /* Collegia purple */
+    color: #f0a500;
     text-align: center;
     margin-bottom: 20px;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
@@ -71,7 +71,7 @@ h2 {
 
 .card-content h3 {
     margin-top: 0;
-    color: #2575fc; /* Collegia blue */
+    color: #ff6b6b;
 }
 
 .card-actions {
@@ -80,19 +80,20 @@ h2 {
 }
 
 .card-actions button {
-    background: #6a11cb;
+    background: #f0a500;
     border: none;
     padding: 8px 15px;
     margin-left: 10px;
     border-radius: 8px;
     cursor: pointer;
-    color: #fff;
+    color: #000;
     font-weight: bold;
     transition: all 0.3s ease;
 }
 
 .card-actions button:hover {
-    background: #2575fc;
+    background: #ff6b6b;
+    color: #fff;
     transform: scale(1.05);
 }
 
@@ -123,15 +124,15 @@ h2 {
 }
 
 .event-form button, .feedback-form button {
-    background: #6a11cb;
+    background: #f0a500;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: #fff;
 }
 
 .event-form button:hover, .feedback-form button:hover {
-    background: #2575fc;
+    background: #ff6b6b;
+    color: #fff;
     transform: scale(1.05);
 }
 

@@ -1,8 +1,19 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import database
 
+# Initialize FastAPI app
 app = FastAPI(title="Collegia - College Event Manager")
+
+# Enable CORS for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For local testing, allows any origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Models
 class Event(BaseModel):
@@ -23,7 +34,7 @@ class Feedback(BaseModel):
     rating: int
     comments: str
 
-# CRUD Events
+# ---------------- CRUD EVENTS ----------------
 @app.get("/events")
 def get_events():
     return database.fetch_all_events()
@@ -32,13 +43,15 @@ def get_events():
 def create_event(event: Event):
     conn = database.get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO events (name, date, location, description, type, college_id) VALUES (?, ?, ?, ?, ?, ?)",
-                (event.name, event.date, event.location, event.description, event.type, event.college_id))
+    cursor.execute(
+        "INSERT INTO events (name, date, location, description, type, college_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (event.name, event.date, event.location, event.description, event.type, event.college_id)
+    )
     conn.commit()
     conn.close()
     return {"message": "Event created successfully"}
 
-# CRUD Students
+# ---------------- CRUD STUDENTS ----------------
 @app.get("/students")
 def get_students():
     return database.fetch_all_students()
@@ -52,38 +65,46 @@ def create_student(student: Student):
     conn.close()
     return {"message": "Student created successfully"}
 
-# Registration
+# ---------------- REGISTRATION ----------------
 @app.post("/register")
 def register(student_id: int, event_id: int):
     conn = database.get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (?, ?, ?)", (student_id, event_id, 0))
+    cursor.execute(
+        "INSERT OR IGNORE INTO registrations (student_id, event_id, attended) VALUES (?, ?, ?)",
+        (student_id, event_id, 0)
+    )
     conn.commit()
     conn.close()
     return {"message": "Student registered"}
 
-# Attendance
+# ---------------- ATTENDANCE ----------------
 @app.patch("/attendance")
 def mark_attendance(student_id: int, event_id: int):
     conn = database.get_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE registrations SET attended = 1 WHERE student_id = ? AND event_id = ?", (student_id, event_id))
+    cursor.execute(
+        "UPDATE registrations SET attended = 1 WHERE student_id = ? AND event_id = ?",
+        (student_id, event_id)
+    )
     conn.commit()
     conn.close()
     return {"message": "Attendance marked"}
 
-# Feedback
+# ---------------- FEEDBACK ----------------
 @app.post("/feedback")
 def feedback(feedback: Feedback):
     conn = database.get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT OR REPLACE INTO feedback (student_id, event_id, rating, comments) VALUES (?, ?, ?, ?)",
-                (feedback.student_id, feedback.event_id, feedback.rating, feedback.comments))
+    cursor.execute(
+        "INSERT OR REPLACE INTO feedback (student_id, event_id, rating, comments) VALUES (?, ?, ?, ?)",
+        (feedback.student_id, feedback.event_id, feedback.rating, feedback.comments)
+    )
     conn.commit()
     conn.close()
     return {"message": "Feedback submitted"}
 
-# Reports
+# ---------------- REPORTS ----------------
 @app.get("/reports/registrations")
 def registrations_report():
     conn = database.get_connection()
