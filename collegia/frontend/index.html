@@ -1,51 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collegia</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="assets/collegia_logo.jpeg" type="image/jpeg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collegia Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="assets/collegia_logo.jpeg" type="image/jpeg">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <img src="assets/collegia_logo.jpeg" alt="Collegia Logo" class="logo">
-        <h1>Collegia</h1>
-    </header>
-
-    <div class="container">
-        <!-- Events Section -->
-        <section class="events-section">
-            <h2>Events List</h2>
-            <ul id="eventsList" class="events-list"></ul>
-        </section>
-
-        <!-- Event Form Section -->
-        <section class="form-section">
-            <h2>Add / Edit Event</h2>
-            <form id="eventForm" class="event-form">
-                <input type="text" id="name" placeholder="Event Name" required>
-                <input type="date" id="date" required>
-                <input type="text" id="location" placeholder="Location">
-                <input type="text" id="description" placeholder="Description">
-                <input type="number" id="college_id" placeholder="College ID" required>
-                <button type="submit" class="btn">Save Event</button>
-            </form>
-        </section>
-
-        <!-- Feedback Section -->
-        <section class="feedback-section">
-            <h2>Submit Feedback</h2>
-            <form id="feedbackForm" class="feedback-form">
-                <input type="text" id="student_name" placeholder="Your Name" required>
-                <input type="number" id="event_id" placeholder="Event ID" required>
-                <textarea id="feedback" placeholder="Write your feedback here..." rows="4" required></textarea>
-                <button type="submit" class="btn">Submit Feedback</button>
-            </form>
-        </section>
+<!-- Sidebar Navigation -->
+<aside class="sidebar">
+    <div class="brand">
+    <img src="assets/collegia_logo.jpeg" alt="Collegia Logo" class="logo">
+    <h2>Collegia</h2>
     </div>
+    <nav class="nav">
+    <button class="nav-link active" data-section="home">🏠 Home</button>
+    <button class="nav-link" data-section="events">📅 Events</button>
+    <button class="nav-link" data-section="students">🎓 Students</button>
+    <button class="nav-link" data-section="feedback">📝 Feedback</button>
+    <button class="nav-link" data-section="reports">📊 Reports</button>
+    </nav>
+</aside>
 
-    <script src="script.js"></script>
+<!-- Main Content -->
+<main class="main-content">
+    
+    <!-- Home Section -->
+    <section id="home" class="section active">
+    <h1>Welcome to Collegia 🎉</h1>
+    <p>Manage events, students, registrations, feedback, and reports all in one place.</p>
+    </section>
+
+    <!-- Events Section -->
+    <section id="events" class="section">
+    <h2>Events</h2>
+    <div class="card">
+        <h3>Events List</h3>
+        <ul id="eventsList" class="events-list"></ul>
+    </div>
+    <div class="card">
+        <h3>Add / Edit Event</h3>
+        <form id="eventForm" class="event-form">
+        <input type="text" id="name" placeholder="Event Name" required>
+        <input type="date" id="date" required>
+        <input type="text" id="location" placeholder="Location">
+        <input type="text" id="description" placeholder="Description">
+        <input type="number" id="college_id" placeholder="College ID" required>
+        <button type="submit" class="btn">Save Event</button>
+        </form>
+    </div>
+    </section>
+
+    <!-- Students Section -->
+    <section id="students" class="section">
+    <h2>Students</h2>
+    <div class="card">
+        <h3>Student List</h3>
+        <ul id="studentsList"></ul>
+    </div>
+    <div class="card">
+        <h3>Register Student</h3>
+        <form id="studentForm">
+        <input type="text" id="student_name" placeholder="Student Name" required>
+        <input type="email" id="student_email" placeholder="Student Email" required>
+        <button type="submit" class="btn">Add Student</button>
+        </form>
+    </div>
+    </section>
+
+    <!-- Feedback Section -->
+    <section id="feedback" class="section">
+    <h2>Submit Feedback</h2>
+    <form id="feedbackForm" class="feedback-form">
+        <input type="number" id="student_id" placeholder="Student ID" required>
+        <input type="number" id="event_id" placeholder="Event ID" required>
+        <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5" required>
+        <textarea id="comments" placeholder="Write your feedback here..." rows="4" required></textarea>
+        <button type="submit" class="btn">Submit Feedback</button>
+    </form>
+    </section>
+
+    <!-- Reports Section -->
+    <section id="reports" class="section">
+    <h2>Reports</h2>
+    <div class="card">
+        <button id="reportRegistrations" class="btn">📌 Registrations Report</button>
+        <button id="reportAttendance" class="btn">✅ Attendance Report</button>
+        <button id="reportFeedback" class="btn">⭐ Feedback Report</button>
+        <button id="reportTopStudents" class="btn">🏆 Top Students</button>
+    </div>
+    <div id="reportOutput" class="report-output"></div>
+    </section>
+    
+</main>
+
+<script src="script.js"></script>
 </body>
 </html>

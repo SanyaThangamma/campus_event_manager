@@ -1,5 +1,4 @@
-// Base URL of the FastAPI backend
-const baseUrl = 'http://127.0.0.1:8000';  
+const baseUrl = 'http://127.0.0.1:8000';
 let editEventId = null;
 
 // ---------------- FETCH AND DISPLAY EVENTS ----------------
@@ -18,7 +17,7 @@ async function fetchEvents() {
             content.classList.add('card-content');
             content.innerHTML = `
                 <h3>${e.name}</h3>
-                <p><strong>Date:</strong> ${e.date}</p>
+                <p><strong>Date:</strong> ${new Date(e.date).toLocaleDateString()}</p>
                 <p><strong>Location:</strong> ${e.location || '-'}</p>
                 <p>${e.description || ''}</p>
                 <p><strong>College ID:</strong> ${e.college_id}</p>
@@ -61,10 +60,11 @@ async function fetchEvents() {
 function populateFormForEdit(event) {
     editEventId = event.id;
     document.getElementById('name').value = event.name;
-    document.getElementById('date').value = event.date;
+    document.getElementById('date').value = event.date.split("T")[0]; // strip time
     document.getElementById('location').value = event.location;
     document.getElementById('description').value = event.description;
     document.getElementById('college_id').value = event.college_id;
+    document.querySelector('#eventForm button').textContent = "Update Event";
 }
 
 // ---------------- HANDLE EVENT FORM SUBMISSION ----------------
@@ -76,7 +76,7 @@ document.getElementById('eventForm').addEventListener('submit', async (e) => {
         location: document.getElementById('location').value,
         description: document.getElementById('description').value,
         college_id: parseInt(document.getElementById('college_id').value),
-        type: "General"  // Default type
+        type: "General"
     };
 
     try {
@@ -88,6 +88,7 @@ document.getElementById('eventForm').addEventListener('submit', async (e) => {
                 body: JSON.stringify(newEvent)
             });
             editEventId = null;
+            document.querySelector('#eventForm button').textContent = "Save Event";
         } else {
             res = await fetch(`${baseUrl}/events`, {
                 method: 'POST',
@@ -111,11 +112,16 @@ document.getElementById('eventForm').addEventListener('submit', async (e) => {
 document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const feedbackData = {
-        student_id: 1, // TODO: replace with actual logged-in student
+        student_id: 1, // replace later with logged-in user
         event_id: parseInt(document.getElementById('event_id').value),
-        rating: 5,     // Default rating
+        rating: 5, // default
         comments: document.getElementById('feedback').value
     };
+
+    if (isNaN(feedbackData.event_id)) {
+        alert("Invalid Event ID");
+        return;
+    }
 
     try {
         const res = await fetch(`${baseUrl}/feedback`, {
