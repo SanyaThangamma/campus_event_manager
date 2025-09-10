@@ -1,79 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collegia Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collegia - College Event Manager</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="dashboard">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <h2>📘 Collegia</h2>
-            <nav class="nav-links">
-                <a href="#home" class="active">🏠 Home</a>
-                <a href="#events">📅 Events</a>
-                <a href="#students">👨‍🎓 Students</a>
-                <a href="#feedback">💬 Feedback</a>
-            </nav>
-        </aside>
+<div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+    <h2>Collegia</h2>
+    <nav class="nav-links">
+        <a href="#home" class="active">Home</a>
+        <a href="#events">Events</a>
+        <a href="#students">Students</a>
+        <a href="#reports">Reports</a>
+    </nav>
+    </aside>
 
-        <!-- Main content -->
-        <main class="main-content">
-            <!-- Home -->
-            <section id="home" class="card">
-                <h1>Welcome to Collegia</h1>
-                <p>Manage all your events, students, and feedback easily.</p>
-            </section>
+    <!-- Main Content -->
+    <main class="main-content">
 
-            <!-- Events -->
-            <section id="events" class="card" style="display:none;">
-                <h2>Events</h2>
-                <ul id="eventsList" class="card-grid"></ul>
+    <!-- Home -->
+    <section id="home" class="card">
+        <h1>Welcome to Collegia</h1>
+        <p>Manage all your events, students, and feedback easily.</p>
 
-                <form id="eventForm" class="form">
-                    <input type="text" id="name" placeholder="Event Name" required>
-                    <input type="date" id="date" required>
-                    <input type="text" id="location" placeholder="Location">
-                    <input type="text" id="description" placeholder="Description">
-                    <select id="type" required>
-                        <option value="General">General</option>
-                        <option value="Workshop">Workshop</option>
-                        <option value="Seminar">Seminar</option>
-                        <option value="Competition">Competition</option>
-                    </select>
-                    <input type="number" id="college_id" placeholder="College ID" required>
-                    <button type="submit">Save Event</button>
-                </form>
-            </section>
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+        <div class="stat-card yellow">
+            <h3>📅 Events</h3>
+            <p id="statEvents">0</p>
+        </div>
+        <div class="stat-card blue">
+            <h3>👨‍🎓 Students</h3>
+            <p id="statStudents">0</p>
+        </div>
+        <div class="stat-card green">
+            <h3>📝 Registrations</h3>
+            <p id="statRegistrations">0</p>
+        </div>
+        <div class="stat-card purple">
+            <h3>⭐ Avg Feedback</h3>
+            <p id="statFeedback">0</p>
+        </div>
+        </div>
+    </section>
 
-            <!-- Students -->
-            <section id="students" class="card" style="display:none;">
-                <h2>Students</h2>
-                <ul id="studentsList" class="card-grid"></ul>
+    <!-- Events -->
+    <section id="events" class="card">
+        <h2>Events</h2>
+        <ul id="eventList" class="card-grid"></ul>
 
-                <form id="studentForm" class="form">
-                    <input type="text" id="student_name" placeholder="Name" required>
-                    <input type="email" id="student_email" placeholder="Email" required>
-                    <button type="submit">Add Student</button>
-                </form>
-            </section>
+        <form id="eventForm" class="form">
+        <input type="text" id="eventName" placeholder="Event Name" required>
+        <input type="date" id="eventDate" required>
+        <input type="text" id="eventLocation" placeholder="Location" required>
+        <textarea id="eventDescription" placeholder="Description"></textarea>
+        <input type="text" id="eventType" placeholder="Type (e.g. Seminar)" required>
+        <input type="number" id="eventCollegeId" placeholder="College ID" required>
+        <button type="submit">Add Event</button>
+        </form>
+    </section>
 
-            <!-- Feedback -->
-            <section id="feedback" class="card" style="display:none;">
-                <h2>Feedback</h2>
-                <form id="feedbackForm" class="form">
-                    <input type="number" id="student_id" placeholder="Student ID" required>
-                    <input type="number" id="event_id" placeholder="Event ID" required>
-                    <input type="number" id="rating" min="1" max="5" placeholder="Rating (1-5)" required>
-                    <textarea id="comments" placeholder="Write your feedback..." rows="4" required></textarea>
-                    <button type="submit">Submit</button>
-                </form>
-                <div id="feedbackMsg"></div>
-            </section>
-        </main>
-    </div>
-    <script src="script.js"></script>
+    <!-- Students -->
+    <section id="students" class="card">
+        <h2>Students</h2>
+        <ul id="studentList" class="card-grid"></ul>
+
+        <form id="studentForm" class="form">
+        <input type="text" id="studentName" placeholder="Student Name" required>
+        <input type="email" id="studentEmail" placeholder="Student Email" required>
+        <button type="submit">Add Student</button>
+        </form>
+    </section>
+
+    <!-- Reports -->
+    <section id="reports" class="card">
+        <h2>Reports</h2>
+        <div id="reportContent"></div>
+    </section>
+
+    </main>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
