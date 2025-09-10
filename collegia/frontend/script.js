@@ -7,6 +7,7 @@ const res = await fetch(`${baseUrl}/events`);
 const events = await res.json();
 const list = document.getElementById("eventList");
 list.innerHTML = "";
+
 events.forEach(event => {
     const li = document.createElement("li");
     li.innerHTML = `
@@ -25,6 +26,7 @@ const res = await fetch(`${baseUrl}/students`);
 const students = await res.json();
 const list = document.getElementById("studentList");
 list.innerHTML = "";
+
 students.forEach(student => {
     const li = document.createElement("li");
     li.innerHTML = `
@@ -77,11 +79,13 @@ const data = {
     type: document.getElementById("eventType").value,
     college_id: parseInt(document.getElementById("eventCollegeId").value)
 };
+
 await fetch(`${baseUrl}/events`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
 });
+
 loadEvents();
 fetchStats();
 e.target.reset();
@@ -93,11 +97,13 @@ const data = {
     name: document.getElementById("studentName").value,
     email: document.getElementById("studentEmail").value
 };
+
 await fetch(`${baseUrl}/students`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
 });
+
 loadStudents();
 fetchStats();
 e.target.reset();
